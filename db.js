@@ -4,8 +4,8 @@ const mysql = require('mysql2/promise');
 // Verbindungspool zur MySQL-Datenbank
 const pool = mysql.createPool({
     host: 'localhost',            // Datenbankserver
-    user: 'db_user',              // MySQL-Benutzername
-    password: 'db_password',      // Passwort (anpassen!)
+    user: 'root',                 // MySQL-Benutzername (Standard: root)
+    password: '',                 // Passwort (leer lassen, falls kein Passwort gesetzt ist)
     database: 'spruchsammlung_db',// Name der Datenbank
     waitForConnections: true,
     connectionLimit: 10,
@@ -13,4 +13,4 @@ const pool = mysql.createPool({
 });
 
 // Exportieren, damit andere Dateien (z. B. server.js) darauf zugreifen können
-module.exports = { pool };
+module.exports = { pool }

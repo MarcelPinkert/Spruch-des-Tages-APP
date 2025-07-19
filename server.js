@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { pool } = require('./db'); // ← Verbindung zur Datenbank
+const { pool } = require('./db'); 
 
 const app = express();
 const port = 3000;
@@ -11,7 +11,7 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// === GET: Alle Sprüche anzeigen ===
+
 app.get('/api/sprueche', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM sprueche ORDER BY erstellt_am DESC');
@@ -22,7 +22,6 @@ app.get('/api/sprueche', async (req, res) => {
     }
 });
 
-// === GET: Zufälliger Spruch ===
 app.get('/api/sprueche/random', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM sprueche ORDER BY RAND() LIMIT 1');
@@ -37,7 +36,6 @@ app.get('/api/sprueche/random', async (req, res) => {
     }
 });
 
-// === POST: Neuen Spruch hinzufügen ===
 app.post('/api/sprueche', async (req, res) => {
     const { text, autor } = req.body;
 
@@ -61,14 +59,13 @@ app.post('/api/sprueche', async (req, res) => {
     }
 });
 
-// === DELETE: Spruch löschen ===
 app.delete('/api/sprueche/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
         const [result] = await pool.execute('DELETE FROM sprueche WHERE id = ?', [id]);
         if (result.affectedRows > 0) {
-            res.status(204).send(); // Kein Inhalt, aber erfolgreich
+            res.status(204).send(); 
         } else {
             res.status(404).json({ error: 'Spruch nicht gefunden' });
         }
