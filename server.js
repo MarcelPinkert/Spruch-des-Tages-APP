@@ -1,17 +1,20 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const { pool } = require('./db'); 
+const { pool } = require('./db'); // Stelle sicher, dass db.js korrekt eingerichtet ist
 
 const app = express();
 const port = 3000;
 
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+}));
+app.use(express.json()); // statt body-parser
 
-
+// Alle Sprüche abrufen
 app.get('/api/sprueche', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM sprueche ORDER BY erstellt_am DESC');
@@ -22,6 +25,7 @@ app.get('/api/sprueche', async (req, res) => {
     }
 });
 
+// Zufälligen Spruch abrufen
 app.get('/api/sprueche/random', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM sprueche ORDER BY RAND() LIMIT 1');
@@ -36,6 +40,7 @@ app.get('/api/sprueche/random', async (req, res) => {
     }
 });
 
+// Neuen Spruch erstellen
 app.post('/api/sprueche', async (req, res) => {
     const { text, autor } = req.body;
 
@@ -59,13 +64,43 @@ app.post('/api/sprueche', async (req, res) => {
     }
 });
 
+// Spruch bearbeiten (PUT)
+app.put('/api/sprueche/:id', async (req, res) => {
+    const { id } = req.params;
+    const { text, autor } = req.body;
+
+    if (!text || !autor) {
+        return res.status(400).json({ error: 'Text und Autor sind erforderlich' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            'UPDATE sprueche SET text = ?, autor = ? WHERE id = ?',
+            [text, autor, id]
+        );
+        if (result.affectedRows > 0) {
+            const [updatedSpruch] = await pool.execute(
+                'SELECT * FROM sprueche WHERE id = ?',
+                [id]
+            );
+            res.status(200).json(updatedSpruch[0]);
+        } else {
+            res.status(404).json({ error: 'Spruch nicht gefunden' });
+        }
+    } catch (error) {
+        console.error('Fehler beim Aktualisieren des Spruchs:', error);
+        res.status(500).json({ error: 'Fehler beim Aktualisieren des Spruchs' });
+    }
+});
+
+// Spruch löschen
 app.delete('/api/sprueche/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
         const [result] = await pool.execute('DELETE FROM sprueche WHERE id = ?', [id]);
         if (result.affectedRows > 0) {
-            res.status(204).send(); 
+            res.status(204).send();
         } else {
             res.status(404).json({ error: 'Spruch nicht gefunden' });
         }
@@ -79,5 +114,6 @@ app.delete('/api/sprueche/:id', async (req, res) => {
 app.listen(port, () => {
     console.log(`✅ Server läuft auf http://localhost:${port}`);
 });
+
 
 
