@@ -1,7 +1,7 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
-const { pool } = require('./db'); // Stelle sicher, dass db.js korrekt eingerichtet ist
+const { pool } = require('./db'); 
 
 const app = express();
 const port = 3000;
